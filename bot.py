@@ -18,7 +18,7 @@ SERVER_XML = os.getenv('SERVER_XML')
 client = commands.Bot(command_prefix=['!'])
 
 def takeSecond(elem):
-	return elem[1]
+	return elem[2]
 
 def sql_connection(db_file):
         con = None
@@ -33,6 +33,7 @@ def create_sqlList():
         playerUnique = []
         player_uptime = 0
         player_final = []
+        player_topTen = []
         database = "playtime.db"
         con = sql_connection(database)
         cur = con.cursor()
@@ -44,17 +45,19 @@ def create_sqlList():
                 playerList.append(i[0])
         #taking duplicate entries out of the list
         playerUnique = list(dict.fromkeys(playerList))
-        for i in playerUnique: 
+        for index, i in enumerate(playerUnique): 
                 for player,uptime,time in rawList:
                         if player == i:
                                 player_uptime = player_uptime + uptime
 #               print(f'{i}s uptime is {player_uptime}')
-                player_final.append([i,player_uptime])
+                if player_uptime > 100:
+                    player_time = "{}h {}m".format(*divmod(player_uptime, 60))
+                    player_final.append([i,player_time,player_uptime])
                 player_uptime = 0
-        return player_final
+        return(player_final)
 
 def getOnline():
-    data = urlopen("SERVER_XML").read()
+    data = urlopen().read()
     Bs_data = BeautifulSoup(data, "xml")
     b_unique = Bs_data.find('Slots')
     value = b_unique.get('numUsed')
@@ -62,7 +65,7 @@ def getOnline():
 
 def getPlayers():
     playerTab = []
-    data = urlopen("SERVER_XML").read()
+    data = urlopen().read()
     bs_data = BeautifulSoup(data, "xml")
     playerList = bs_data.find_all('Player')
     for i in playerList:
@@ -82,15 +85,15 @@ async def on_ready():
 
 @tasks.loop(minutes=5)
 async def countChannel():
-    channel = client.get_channel(CHANNEL_ID)
-    new_name = "✅Players Online {}/16✅".format(getOnline())
+    channel = client.get_channel()
+    new_name = "âœ…Players Online {}/16âœ…".format(getOnline())
     print(new_name)
     await channel.edit(name=new_name)
 
 @tasks.loop(minutes=2)
 async def embedOnline():
-	channel = client.get_channel(CHANNEL_ID)
-	msg_id = MESSAGE_ID
+	channel = client.get_channel()
+	msg_id = 
 	embedDisc = "Online Players {}/16".format(getOnline())
 	embed=discord.Embed(title="Realistic Farming UK Server", description=embedDisc, color=0xff00d0)
 	playersTab = getPlayers()
@@ -102,13 +105,14 @@ async def embedOnline():
 
 @tasks.loop(minutes=2)
 async def embedLeaderboard():
-        channel = client.get_channel(CHANNEL_ID)
-        msg_id = MESSAGE_ID
+        channel = client.get_channel()
+        msg_id = 
         embedDisc = "(Updates once you have left the server)"
-        embed=discord.Embed(title=" Leaderboard", description=embedDisc, color=0xff00d0)
+        embed=discord.Embed(title=" Top ten players of all time", description=embedDisc, color=0xff00d0)
         playersTab = create_sqlList()
         playersTab.sort(key=takeSecond,reverse=True)
-        playerField = "\n".join([f"{player} - {time} Mins" for player, time in playersTab])
+        playersTopTen = playersTab[:10]
+        playerField = "\n".join([f"{player} - {time}" for player, time, minutes in playersTopTen])
         if playerField:
                 embed.add_field(name="Players:",value=playerField, inline=False)
         msg = await channel.fetch_message(msg_id)
@@ -116,3 +120,6 @@ async def embedLeaderboard():
 
 
 client.run(TOKEN)
+
+
+
