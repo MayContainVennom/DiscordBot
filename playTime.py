@@ -55,16 +55,17 @@ def checkTable(playerCache,playerLive):
 		if search(playerLive, player):
 			print(f'Player {player} is still online')
 		else:
-			print(f'Player {player} left, last playtime {uptime}')
-			dateTimeObj = datetime.now()
-			timeStamp = dateTimeObj.strftime("%d-%b-%Y (%H:%M)")
-			sql_main(player,uptime,timeStamp)
+			if uptime > 0:
+				print(f'Player {player} left, last playtime {uptime}')
+				dateTimeObj = datetime.now()
+				timeStamp = dateTimeObj.strftime("%d-%b-%Y (%H:%M)")
+				sql_main(player,uptime,timeStamp)
 	return playerLive
 
 loop = True
 playerCache = getPlayers()
 while loop:
-	time.sleep(60)
+	time.sleep(15)
 	playerLive = getPlayers()
 	checkTable(playerCache,playerLive)
 	playerCache = playerLive
