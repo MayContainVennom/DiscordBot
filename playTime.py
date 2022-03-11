@@ -40,7 +40,7 @@ def search(list, player):
 
 def getPlayers():
     playerTab = []
-    data = urlopen("http://10.0.20.3:8080/feed/dedicated-server-stats.xml?code=a51fce89c74b87cfbe526cbbc5ab18eb").read()
+    data = urlopen("").read()
     bs_data = BeautifulSoup(data, "xml")
     playerList = bs_data.find_all('Player')
     for i in playerList:
